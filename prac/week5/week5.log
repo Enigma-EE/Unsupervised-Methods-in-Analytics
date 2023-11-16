@@ -1,0 +1,82 @@
+1                                                          The SAS System                            Sunday, 27 August 2023 19:20:00
+
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+1          %let SYSCC=0;
+2          %let SYSRC=0;
+3          %let EMEXCEPTIONSTRING=;
+4          %let SYSMSG=;
+5          %GLOBAL PRODNUMS;data products;input prodnum $ 1-10 desc $ 12-30;status = sysprod(prodnum);if (status = 1) then do;call
+5        ! symput( 'PRODNUMS', cat( symget( 'PRODNUMS'), ',', prodnum ) );end;datalines;
+19         ;run;%put &PRODNUMS;
+,PRODNUM075,PRODNUM102,PRODNUM106,PRODNUM107,PRODNUM677
+2                                                          The SAS System                            Sunday, 27 August 2023 19:20:00
+
+20         %let SYSCC=0;
+21         %let SYSRC=0;
+22         %let EMEXCEPTIONSTRING=;
+23         %let SYSMSG=;
+24         %GLOBAL PRODNUMS;data products;input prodnum $ 1-10 desc $ 12-30;status = sysprod(prodnum);if (status = 1) then do;call
+24       ! symput( 'PRODNUMS', cat( symget( 'PRODNUMS'), ',', prodnum ) );end;datalines;
+38         ;run;%put &PRODNUMS;
+,PRODNUM075,PRODNUM102,PRODNUM106,PRODNUM107,PRODNUM677,PRODNUM075,PRODNUM102,PRODNUM106,PRODNUM107,PRODNUM677
+3                                                          The SAS System                            Sunday, 27 August 2023 19:20:00
+
+39         %let SYSCC=0;
+40         %let SYSRC=0;
+41         %let EMEXCEPTIONSTRING=;
+42         %let SYSMSG=;
+43         filename _emproj catalog 'sashelp.emwip.em_project.source';
+44         %inc _emproj;
+182        filename _emproj;
+183        %em_project(action=getServerInfo,
+184        outfile=projectServerInfo.xml
+185        );
+197        filename _wipxml
+197      ! '/saswork/SAS_workABEA00002836_odaws01-apse1.oda.sas.com/SAS_work978900002836_odaws01-apse1.oda.sas.com/projectServerInfo
+197      ! .xml' encoding="UTF-8" NOBOM;
+4                                                          The SAS System                            Sunday, 27 August 2023 19:20:00
+
+WARNING: End of file.
+WARNING: End of file.
+198        filename _emenv catalog 'sashelp.emwip.em_loadmacros.source';
+199        %inc _emenv;
+1285       filename _emenv;
+1286       %let WIP_PROJPATH=%nrstr(~);
+1287       %let WIP_PROJNAME=%nrstr(Prac#4);
+1288       proc display c=sashelp.emwip.em_init.scl; run;
+7841       %let SYSCC=0;
+7842       options VBUFSIZE= 64M;
+7843       *------------------------------------------------------------*;
+7844       * Setup Code for Data Source id = DUNGAREE;
+7845       *------------------------------------------------------------*;
+7846       LIBNAME AAEM BASE "/tutorials/data/studio/aaem" ACCESS=READONLY ;
+7847       
+5 The SAS System                                                                                                                                                                                                                 Sunday, 27 August 2023 19:20:0
+0
+
+7848       %let SYSCC=0;
+7849       %let SYSRC=0;
+7850       %let EMEXCEPTIONSTRING=;
+7851       %let SYSMSG=;
+7852       %em_project(action=ASSIGNLIBNAMES, projpath=%nrstr(~), projname=%nrstr(Prac#4));
+7864       libname EMWS1 %nrstr("~/Prac#4/Workspaces/EMWS1") access=READONLY;
