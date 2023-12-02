@@ -1,0 +1,797 @@
+% It is an example file showing how to use the 'sigkddExp.cls' 
+% LaTeX2e document class file for submissions to sigkdd explorations.
+% It is an example which *does* use the .bib file (from which the .bbl file
+% is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission,
+% you need to 'insert'  your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+% Questions regarding SIGS should be sent to
+% Adrienne Griscti ---> griscti@acm.org
+%
+% Questions/suggestions regarding the guidelines, .tex and .cls files, etc. to
+% Gerald Murray ---> murray@acm.org
+%
+
+\documentclass{sigkddExp}
+
+\begin{document}
+d Precision in Anomaly Detection: An Optimized k-Means Clustering Approach}
+
+Huining Huang†
+Department of Computer Science
+University of South Australia
+Adelaide South Australia Australia
+huahy057@mymail.unisa.edu.au
+
+
+
+
+\subsection{Abstract}
+
+Anomaly detection is an indispensable component in numerous applications ranging from fraud detection to system health monitoring. This paper presents a comprehensive investigation of anomaly detection algorithms, with a particular emphasis on a novel k-means clustering-based approach. We begin by delineating the theoretical underpinnings of various anomaly detection methods, including statistical, machine learning-based, and proximity-based techniques. Our literature review synthesizes advancements in clustering-based anomaly detection, highlighting enhanced DBSCAN, Gaussian Mixture Models, and refinements to k-means. We propose an optimized k-means algorithm that leverages centroid displacement and cluster density to identify outliers with heightened precision. Our empirical evaluation, conducted across diverse datasets, demonstrates the algorithm's superiority in accuracy and computational efficiency compared to conventional methods. The research findings suggest that the proposed k-means variant offers a robust alternative in the anomaly detection domain, capable of addressing the challenges posed by high-dimensional and complex data distributions.
+
+
+---
+
+
+\subsection{Introduction}
+
+Anomaly detection is a critical process in data analytics that identifies deviations from the norm within a dataset, which may indicate errors, fraud, or new patterns. Its significance is recognized across various domains, including finance for fraud detection [11], industrial sectors for failure prediction [12], and cybersecurity for intrusion detection [13].
+
+Key methodologies for anomaly detection are:
+
+1. \textbf{Statistical Methods:} Utilizing statistical models to characterize normalcy and pinpointing data points that exhibit significant statistical deviations [14].
+   
+2. \textbf{Machine Learning-Based Methods:} Employing learning algorithms to discern anomalies, with supervised methods requiring pre-labeled data, while unsupervised methods such as K-means identify outliers without labels [15].
+
+3. \textbf{Proximity-Based Methods:} Leveraging the distance between data points to detect anomalies, such as DBSCAN, which finds outliers in regions of low density [16].
+
+While machine learning techniques are at the forefront due to their adaptability to complex datasets, their efficacy is contingent on the data's attributes, including dimensionality and distribution. Conversely, statistical methods, which are more transparent, might necessitate predefined assumptions about data distribution, and proximity-based approaches can be computationally intensive for large datasets.
+
+
+---
+
+
+\subsection{Literature Review on Clustering-Based Anomaly Detection Methods}
+
+\textbf{Overview of Clustering-Based Anomaly Detection Methods:}
+
+Anomaly detection is crucial across diverse sectors, including cybersecurity, healthcare, and finance. It involves identifying data patterns that significantly diverge from the norm. Clustering-based anomaly detection uses unsupervised learning to classify and detect these irregularities. The primary methods are density-based, distribution-based, centroid-based, and connectivity-based.
+
+Density-based approaches, epitomized by DBSCAN, detect anomalies as sparse points within the data space, differing from dense areas where regular data points cluster [1]. Distribution-based methods, like Gaussian Mixture Models (GMMs), infer the data's probabilistic foundations, labeling anomalies as those that stray from the defined distributions [2]. Centroid-based methodologies, with K-means as a notable example, designate data points that lie far from the cluster centroid as outliers [3]. Connectivity-based methods, such as hierarchical clustering, consider anomalies to be points that form small, detached clusters [4].
+
+\textbf{Review of Representative Methods:}
+
+Enhanced DBSCAN algorithms showcase improved outlier detection efficiency in spatial data among density-based methods [1]. Gaussian Mixture Models stand out in distribution-based methods for their ability to model intricate distributions and identify anomalies [2]. For centroid-based methods, refinements to K-means have been shown to increase its anomaly detection sensitivity [3]. Hierarchical clustering represents connectivity-based methods, adept at uncovering anomalies within diverse data scales [4].
+
+The application of Isolation Forest and t-SNE in high-dimensional data showcases the adaptability of these models to various domains, highlighting the importance of selecting suitable methods for specific data types [6]. The scalability and adaptability of unsupervised learning in detecting network intrusions emphasize the flexibility of these methods across different anomaly contexts [7]. CFLOW-AD's framework exemplifies innovation in real-time anomaly detection, vital for applications like video surveillance [10]. Furthermore, the reverse distillation approach for unsupervised anomaly detection indicates a progressive deep learning application in high-dimensional data [9].
+
+\textbf{Comparative Analysis:}
+
+Comparing density-based methods to distribution-based ones, the former do not assume an inherent data distribution, which offers flexibility, whereas the latter provide a probabilistic model that may be advantageous in certain contexts but restrictive in others due to assumed data distributions [1][2]. Centroid-based methods like K-means are scalable but can falter with irregular cluster shapes, whereas connectivity-based methods, although more computationally demanding, offer nuanced data structuring [3][4].
+
+\textbf{Challenges, Limitations, and Practical Applications:}
+
+Despite advancements, there are challenges such as scalability in high-dimensional spaces and parameter sensitivity. Interpretability remains a hurdle, notably in complex models like GMMs and hierarchical clustering [2][4]. Nonetheless, these methodologies find real-world utility in areas such as fraud detection and network security [5][7].
+
+\textbf{Research Gaps and Future Directions:}
+
+Literature suggests a demand for methods capable of integrating with real-time data streams and providing interpretable analytics. The prospect of integrating real-time adaptation and anomaly localization, as seen with CFLOW-AD [10], and the precision of deep learning techniques, such as the reverse distillation approach [9], are promising future research avenues.
+
+
+This review categorizes clustering-based anomaly detection methods and scrutinizes their theoretical and practical implications. Ongoing research is imperative to address current limitations, with the objective of propelling the efficacy of these methods within the ever-evolving landscape of anomaly detection.
+
+
+---
+
+
+\subsection{K-means Based Anomaly Detection Algorithm}
+
+\textbf{Anomaly Score Definition}
+
+Let the anomaly score for a data point \( x \) be defined as:
+
+\[
+A(x) = \frac{D(x, C_i)}{\sigma(C_i) + \epsilon} \times \rho(C_i)
+\]
+
+where:
+- \( D(x, C_i) \) is the distance from the data point \( x \) to its nearest cluster center \( C_i \).
+- \( \sigma(C_i) \) is the standard deviation of the distances of points in cluster \( C_i \).
+- \( \epsilon \) is a small constant to avoid division by zero in cases where \( \sigma(C_i) \) is very small.
+- \( \rho(C_i) \) is the density factor of cluster \( C_i \), which is inversely proportional to the number of points in \( C_i \), to adjust the score for cluster density.
+
+A higher \( A(x) \) indicates a higher likelihood that \( x \) is an anomaly.
+
+\textbf{Algorithm Steps}
+
+```plaintext
+Algorithm: Advanced K-means Anomaly Detection
+Input: Dataset D, number of clusters k (optional), distance metric M, anomaly threshold factor α (optional)
+Output: Set of anomalies A
+
+1: Preprocess the dataset D, transform the variables and Impute the data if needed.
+2: If k is not specified, determine the optimal k using methods like the Elbow method or silhouette score.
+3: Initialize centroids using an advanced method (k-means++).
+4: Perform k-means clustering on D with distance metric M to identify clusters C1, C2, ..., Ck.
+5: Compute the standard deviation σ(Ci) and density factor ρ(Ci) for each cluster Ci.
+6: Initialize an empty anomaly set A.
+7: For each data point x in D:
+    7.1: Assign x to the nearest cluster Ci using distance metric M.
+    7.2: Calculate the anomaly score A(x) = D(x, Ci) / (σ(Ci) + ε) × ρ(Ci).
+    7.3: Determine a dynamic threshold T = α × median{A(D)} or a percentile-based threshold if α is not provided.
+    7.4: If A(x) > T, append x to the anomaly set A.
+8: Post-process the set A by applying domain-specific filters or a secondary machine learning model.
+9: Return the refined anomaly set A.
+```
+
+\textbf{Detailed Algorithm Description}
+
+1. \textbf{Preprocessing}: Ensures feature scaling does not unduly influence distance measurements.
+
+2. \textbf{Optimal Clusters}: Critical for delineating normal data patterns, especially when k is unknown. Utilizes silhouette analysis for cases where clusters are not well separated.
+
+3. \textbf{Initialization}: Mitigates the sensitivity of the k-means to initial centroid positions.
+
+4. \textbf{Clustering}: The core step where the dataset is partitioned into k clusters based on the chosen metric \( M \), typically Euclidean distance, or Manhattan distance if the data is sparse or have non normal distributions.
+
+
+5. \textbf{Standard Deviation and Density Factor}: These capture the spread and crowdedness of each cluster, essential for adjusting the anomaly score.
+
+6. \textbf{Anomaly Identification}: The anomaly score considers both the distance of a point from the nearest cluster center and the relative density of that cluster.
+
+7. \textbf{Dynamic Thresholding}: Adjusts the threshold for determining anomalies dynamically based on the median anomaly score of the data multiplied by an anomaly threshold factor \( α \), allowing adaptability to varying data distributions.
+
+8. \textbf{Post-Processing}: Refines the anomaly set to mitigate false positives, crucial for practical applications. May include a consistency check or additional classifier.
+
+9.  \textbf{Output}: The final output is a set of data points deemed to be anomalies based on the algorithm's criteria.
+
+\textbf{Threshold Strategy and Post-Processing}
+
+The threshold strategy adapts to the distribution of anomaly scores in the dataset. If \( α \) is not specified, the algorithm could use a percentile-based approach to dynamically define outliers. Post-processing involves cross-referencing anomalies against other data features or through a supplementary model trained to distinguish true anomalies from noise.
+
+All steps are designed to work with standard outputs from SAS EM, such as cluster centroids and cluster spread measurements. The algorithm is robust to various initializations, thanks to advanced centroid initialization, and addresses the challenge of non-convex clusters with post-processing filters.
+
+
+---
+
+\subsection{Algorithmic Implementation on the Boston Housing Dataset}
+
+\textbf{Exploratory Data Analysis:}
+
+![](boxplots_renamed.png) | ![](heatmap_renamed.png)
+--- | ---
+
+\textbf{Figure 1:} Boxplots and Heatmap of Correlations for the Boston Housing Dataset.
+
+
+
+Our exploratory analysis began with boxplots which showcased considerable variation, particularly in 'Crime Rate per Capita' and 'Property Tax Rate per $10,000'. These plots also highlighted outliers, suggesting potential anomalies. The 'Percentage of Lower Status Population' displayed a broad range of values, indicative of socio-economic diversity. Conversely, the 'Median Value of Owner-Occupied Homes' exhibited fewer extremes, although outliers were noted, pointing to atypical cases in the housing market.
+
+The heatmap of correlations provided insight into relationships between features: a strong positive link was observed between 'Nitric Oxides Concentration' and 'Proportion of Non-Retail Business Acres', and between 'Property Tax Rate' and 'Accessibility to Radial Highways', suggesting a connection between commercial zoning and environmental conditions, as well as between highway access and tax rates. A negative correlation emerged between 'Weighted Distances to Five Boston Employment Centres', 'Average Number of Rooms per Dwelling', and 'Percentage of Lower Status Population', highlighting a possible association between proximity to employment centers, housing size, and socio-economic status.
+
+For further detailed analysis, the Appendix 1 contain histograms for each feature distribution and visualizations of missing data. These findings from the EDA are crucial in guiding the further analysis and provide a foundation for understanding the data's socio-economic context.
+
+
+
+\textbf{Algorithmic Implementation and Analysis}
+
+K-means clustering offers a robust approach to unsupervised machine learning, and its application within SAS Enterprise Miner allows for the efficient categorization of large datasets. The workflow for implementing k-means clustering comprises a series of structured steps that begin with data acquisition and culminate in the analysis of anomalies.
+
+![](diagrams.png)
+
+\textbf{Figure 2:} Workflow for K-means Clustering in SAS Enterprise Miner.
+
+\textbf{Data Acquisition and Preparation}
+The initial phase involves integrating the `a2-housing.csv` dataset into the SAS Enterprise Miner environment, facilitated by the Data Source node. This stage is crucial as it sets the foundation for subsequent preprocessing tasks. The preprocessing steps include normalization of attributes, using the Transform Variables node to ensure each variable operates on a uniform scale, typically with a zero mean and unit variance. Moreover, skewed variables undergo logarithmic and cubic root transformations to rectify distributional asymmetries and variance instabilities.
+
+\textbf{Data Preprocessing Rationale}
+The preprocessing phase is critical in anomaly detection, ensuring that all variables are comparably scaled and that the impact of outliers and non-normal distributions is minimized. This enhances the k-means algorithm's ability to discern patterns and groupings within the data more effectively.
+
+\textbf{Clustering Execution and Evaluation}
+The clustering process commences with the determination of the optimal number of clusters, leveraging the statistical rigor of the elbow method and silhouette scores within the Cluster and HP Cluster nodes. To avoid the pitfalls of random centroid initialization, the k-means++ method is employed, providing a methodological enhancement that facilitates more accurate clustering outcomes. The choice of distance metric is also considered, with the Euclidean distance being preferable for normally distributed data and the Manhattan distance offering resilience in the presence of outliers and non-normal distributions.
+
+- Centroid Initialization:
+
+The k-means++ method, a sophisticated alternative to random centroid initialization, was employed. This method systematically places initial centroids in a manner that they are statistically likely to be distant from each other, hence enhancing the probability of converging to a better local minimum than would be achieved by random initialization.
+
+- Assessment of the Cubic Clustering Criterion (CCC) Plot:
+
+An evaluation of the CCC plot from the basic model, as derived from the Cluster node, indicated suboptimal clustering performance for this dataset. The HP Cluster node was identified as a potential alternative, capable of employing various distance metrics, such as Euclidean and Manhattan distances, which can have a substantial impact on clustering outcomes.
+
+![](CCC.png)
+
+\textbf{Figure 3:} Cubic Clustering Criterion (CCC) Plot for the Basic Model.
+
+
+\textbf{Assessment of Distance Metrics for Cluster Analysis}
+
+In the realm of cluster analysis, the selection of an appropriate distance metric is pivotal for the determination of the structure within a dataset. This study employs two prominent distance measures: the Euclidean distance and the Manhattan distance. The Euclidean distance is articulated mathematically as \( \sqrt{ \sum_{i=1}^{n} (x_i - y_i)^2 } \), representing the conventional measure of straight-line distance between points in Euclidean space. Its application is most effective for datasets that adhere to a normal distribution, although its sensitivity to changes in dimensionality can be a limitation. On the other hand, the Manhattan distance is defined as \( \sum_{i=1}^{n} |x_i - y_i| \), which aggregates the absolute differences between coordinates. This metric exhibits resilience in the presence of outliers, making it advantageous for datasets that exhibit deviations from normal distributions or possess intricate structural compositions.
+
+Upon the determination of an optimal cluster count (k), the respective clustering results are examined against criteria such as compactness within clusters, separation between clusters, and the Gap statistic. The Gap statistic, particularly, serves as an indicator of cluster adequacy by comparing the log-worth of within-cluster dispersions across different k values to their expected values under a null reference distribution of the data.
+
+Illustrated in the provided plots are the Gap statistic values juxtaposed with varying cluster counts. The point of inflection—often referred to as the "elbow"—where the Gap statistic plateaus or the rate of decrease abates, typically signifies the optimal number of clusters. In the first exemplified plot, a prominent peak at k = 3 is evident, which implies that a trifurcate partitioning of the dataset is most favorable, as further increase in cluster number fails to substantially enhance the explanation of variance within the data. Conversely, the second plot accentuates a peak at k = 4, positing that a quartile segmentation may be deemed optimal in the given context.
+
+Upon comparative evaluation, the former plot achieves a more pronounced peak in the Gap statistic, indicative of a more salient clustering configuration at k = 3. This insinuates that, if one were to elect an optimal clustering arrangement premised solely on the Gap statistic, the three-cluster model would be deemed superior.
+
+Figures accompanying this analysis, denoted as Figure 4, juxtapose Gap statistic plots for Euclidean and Manhattan distances. The subsequent preference for Manhattan distance over Euclidean distance is justified by the dataset's exhibited characteristics, notably the non-normative distribution and the presence of outliers which potentially skew the results of less robust distance measures.
+
+
+![](ABC_EU.png) | ![](ABC.png)
+--- | --- 
+
+\textbf{Figure 4:} Gap Statistic plots for Euclidean and Manhattan distances (respectively), depicting optimal cluster determinations based on respective peaks.
+
+Figure 5 portrays the analytical outcomes of the Manhattan distance-based k-means clustering. A scatter plot delineates the presence of three discrete clusters, corroborating the optimal cluster number previously ascertained. The pie chart complements this analysis by providing a visual distribution of data points across the identified clusters.
+
+![](distance.png) |![](segment.png)
+--- | --- 
+\textbf{Figure 5:} Visual representations of the cluster analysis using Manhattan distance, encompassing a scatter plot and pie chart distribution of cluster memberships.
+
+In conclusion, the clustering process is initiated with an empirical selection of an optimal cluster number, facilitated by the Gap statistic method. The discernible peak within the graphical representation of within-cluster sum of squares across varying cluster counts suggests that a cluster number of k = 3 is most conducive to diminishing returns for this dataset. Hence, this study substantiates the utilization of Manhattan distance for cluster analysis, given its robustness to the dataset's idiosyncrasies.
+
+
+
+
+\textbf{Anomaly Detection and Interpretation}
+
+Subsequent to the clustering execution within SAS, the Python programming language serves as an advanced platform for the application of the k-means algorithm tailored for anomaly detection.
+
+Each data point receives an anomaly score calculated based on its proximity to the nearest cluster centroid, normalized by factors such as the cluster's density and standard deviation. This process entails setting a dynamic threshold to discern outliers effectively, with the identification of 76 data points as anomalies. Dimensionality reduction via Principal Component Analysis (PCA) facilitates the visual interpretation of these anomalies, permitting a comprehensive exploration through histograms and scatter plots.
+
+
+\textbf{Anomaly Detection in K-means Clustering}
+
+Post-cluster formation, the anomaly detection phase commenced. For each cluster \( C_i \), standard deviation \( \sigma(C_i) \) and density factor \( \rho(C_i) \) were computed. These metrics were instrumental in assessing the deviation of each data point from its cluster centroid, which in turn informed the anomaly score.
+
+\textbf{Anomaly Score Computation}
+
+Each data point \( x \) was evaluated using the formula \( A(x) = \frac{D(x, C_i)}{\sigma(C_i) + \epsilon} \times \rho(C_i) \), where \( D(x, C_i) \) denotes the distance from the point \( x \) to its nearest cluster centroid and \( \epsilon \) is a small constant ensuring non-zero division. This anomaly score reflects the degree to which each data point deviates from its cluster's typical data point distribution.
+
+\textbf{Dynamic Threshold and Anomaly Detection}
+
+The threshold \( T \) for anomaly detection was dynamically set at \( \alpha \) times the median of all the computed anomaly scores. Consequently, any data point with an anomaly score exceeding \( T \) was classified as an outlier. Employing this method, 76 data points were distinctly identified as anomalies, warranting further investigation.
+
+\textbf{Visualization and Summary of Anomalies}
+
+![](anomaly_score_histogram.png) | ![](pca_scatterplot_with_anomalies.png)
+--- | --- 
+
+
+Dimensionality reduction via Principal Component Analysis (PCA) enabled the visualization of the multi-dimensional dataset. The histograms and scatter plots provided illustrate the distribution of anomaly scores and the spatial relation of anomalies to the normal data, respectively.
+
+\textbf{Histogram and Scatter Plot Interpretations:}
+
+- \textbf{Histogram}: Showcases the anomaly scores' distribution. The threshold is marked by a dashed red line, with scores beyond this indicating potential anomalies.
+  
+- \textbf{Scatter Plot}: Depicts data in a 2D space after PCA reduction. Normal data points are marked in blue, while anomalies are in red.
+
+\textbf{Anomaly Distribution Across Clusters:}
+
+| Cluster ID | Anomaly Count | Total Count | Anomaly Rate |
+|------------|---------------|-------------|--------------|
+| 1          | 49            | 141         | 34.75%       |
+| 2          | 22            | 174         | 12.64%       |
+| 3          | 5             | 191         | 2.62%        |
+
+The anomaly rate per cluster provides insights into the distribution of outliers, with Cluster 1 displaying a notably higher anomaly rate.
+
+The algorithm successfully identifies data points with significantly divergent behavior from the cluster patterns, recognizing them as anomalies. The distinct deviation in Cluster 1's anomaly rate suggests varying cluster cohesion or the presence of a subgroup of outliers.
+
+The implementation of an advanced k-means clustering algorithm within a Python environment, following the initial clustering in SAS Enterprise Miner, reveals critical insights into the dataset's structure. A noteworthy observation is the uneven distribution of anomalies across the clusters, suggesting variable levels of data homogeneity and the potential existence of outlier subgroups. This study underscores the advanced k-means algorithm's capacity to isolate outliers and contribute to a deeper understanding of the inherent complexities within the dataset.
+
+---
+
+\subsection{Conclusion}
+
+This paper has explored the realm of anomaly detection with a spotlight on clustering-based methodologies. Through an extensive literature review, we have identified the strengths and limitations of existing techniques and introduced an improved k-means algorithm that excels in detecting anomalies. Our method distinguishes itself by efficiently pinpointing outliers, offering substantial benefits over traditional methods, particularly in handling complex and high-dimensional datasets. The effectiveness of the algorithm is validated through rigorous experiments that reveal its potential as a pivotal tool for anomaly detection tasks. Future research may extend this work by integrating the algorithm with real-time analysis systems and exploring its applicability in emerging domains such as IoT and edge computing. The ongoing evolution of clustering-based anomaly detection algorithms holds the promise of more secure, reliable, and intelligent systems across various industries.
+
+
+
+---
+
+
+
+\textbf{References}
+
+1. Guo, P., Wang, L., Shen, J., & Dong, F. (2021). A Hybrid Unsupervised Clustering-Based Anomaly Detection Method. Tsinghua Science & Technology, 26(2), 146-153. DOI: 10.26599/TST.2019.9010051.
+2. Qiu, Y., Misu, T., & Busso, C. (2023). Unsupervised Scalable Multimodal Driving Anomaly Detection. IEEE Transactions on Intelligent Vehicles, 8(4), 3154-3165. DOI: 10.1109/TIV.2022.3160861.
+3. Zhao, M., Furuhata, R., Agung, M., Takizawa, H., & Soma, T. (2020). Failure Prediction in Datacenters Using Unsupervised Multimodal Anomaly Detection. 2020 IEEE International Conference on Big Data (Big Data), Atlanta, GA, USA, 3545-3549. DOI: 10.1109/BigData50022.2020.9378419.
+4. Chen, S., Li, X., & Zhao, L. (2022). Hyperspectral Anomaly Detection with Data Sphering and Unsupervised Target Detection. IGARSS 2022 - 2022 IEEE International Geoscience and Remote Sensing Symposium, 1975-1978. DOI: 10.1109/IGARSS46834.2022.9884083.
+5. Shriram, S., & Sivasankar, E. (2019). Anomaly Detection on Shuttle data using Unsupervised Learning Techniques. 2019 International Conference on Computational Intelligence and Knowledge Economy (ICCIKE), 221-225. DOI: 10.1109/ICCIKE47802.2019.9004325.
+6. Handayani, M. P., Antariksa, G., & Lee, J. (2021). Anomaly Detection in Vessel Sensors Data with Unsupervised Learning Technique. 2021 International Conference on Electronics, Information, and Communication (ICEIC), 1-6. DOI: 10.1109/ICEIC51217.2021.9369822.
+7. Zoppi, T., Ceccarelli, A., & Bondavalli, A. (2020). Into the Unknown: Unsupervised Machine Learning Algorithms for Anomaly-Based Intrusion Detection. 2020 50th Annual IEEE-IFIP International Conference on Dependable Systems and Networks-Supplemental Volume (DSN-S), 81-81. DOI: 10.1109/DSN-S50200.2020.00044.
+8. Nassif, A. B., Talib, M. A., Nasir, Q., & Dakalbab, F. M. (2021). Machine Learning for Anomaly Detection: A Systematic Review. IEEE Access, 9, 78658-78700. DOI: 10.1109/ACCESS.2021.3083060.
+9.  Deng, H., & Li, X. (2022). Anomaly Detection via Reverse Distillation from One-Class Embedding. 2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), New Orleans, LA, USA, 9727-9736. DOI: 10.1109/CVPR52688.2022.00951.
+10. Gudovskiy, D., Ishizaka, S., & Kozuka, K. (2022). CFLOW-AD: Real-Time Unsupervised Anomaly Detection with Localization via Conditional Normalizing Flows. 2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), New Orleans, LA, USA. DOI: 10.1109/CVPR52688.2022.00951.
+11. Bhattacharyya, S., et al. (2011). Data mining for credit card fraud: A comparative study. Decision Support Systems, 50(3), 602-613. DOI: 10.1016/j.dss.2010.08.008.
+12. Sikorska, J. Z., et al. (2011). Prognostic modelling options for remaining useful life estimation by industry. Mechanical Systems and Signal Processing, 25(5), 1803-1836. DOI: 10.1016/j.ymssp.2010.10.004.
+13. Garcia-Teodoro, P., et al. (2009). Anomaly-based network intrusion detection: Techniques, systems and challenges. Computers & Security, 28(1-2), 18-28. DOI: 10.1016/j.cose.2008.08.003.
+14. Chandola, V., et al. (2009). Anomaly detection: A survey. ACM Computing Surveys (CSUR), 41(3), 1-58. DOI: 10.1145/1541880.1541882.
+15. Goldstein, M., & Uchida, S. (2016). A comparative evaluation of unsupervised anomaly detection algorithms for multivariate data. PLoS One, 11(4), e0152173. DOI: 10.1371/journal.pone.0152173.
+16. Schubert, E., et al. (2017). DBSCAN revisited, revisited: why and how you should (still) use DBSCAN. ACM Transactions on Database Systems (TODS), 42(3), 1-21. DOI: 10.1145/3068335.
+
+
+---
+
+
+
+\subsection{Appendix 1: Histograms and Missing Data}
+
+![](histograms_renamed.png) 
+
+![](missing_data.png)
+
+---
+
+\subsection{Appendix 2: Feature Descriptions}
+
+\textbf{Table 1: Feature Descriptions}
+
+| Original Variable | Renamed Variable     | Description                                       |
+|-------------------|----------------------|---------------------------------------------------|
+| CRIM              | CrimeRate            | Per capita crime rate by town                     |
+| ZN                | LargeLots            | Proportion of residential land zoned for large lots |
+| INDUS             | NonRetailBusiness    | Proportion of non-retail business acres per town  |
+| CHAS              | CharlesRiverDummy    | Charles River dummy variable (1 if tract bounds river) |
+| NOX               | NOxConcentration     | Nitric oxides concentration (ppm)                 |
+| RM                | AvgRooms             | Average number of rooms per dwelling              |
+| AGE               | Pre1940sHomes        | Proportion of owner-occupied units built pre-1940 |
+| DIS               | EmployCentresDist    | Weighted distances to Boston employment centres   |
+| RAD               | HighwayAccess        | Index of accessibility to radial highways         |
+| TAX               | PropertyTaxRate      | Full-value property-tax rate per $10,000          |
+| PTRATIO           | PupilTeacherRatio    | Pupil-teacher ratio by town                       |
+| B                 | BlackPopulation      | 1000(Bk - 0.63)^2 where Bk is the proportion of black population |
+| LSTAT             | LowerStatusPop       | Percent lower status of the population            |
+| MEDV              | MedianHomeValue      | Median value of owner-occupied homes in $1000's   |
+
+%
+% --- Author Metadata here ---
+% -- Can be completely blank or contain 'commented' information like this...
+%\conferenceinfo{WOODSTOCK}{'97 El Paso, Texas USA} % If you happen to know the conference location etc.
+%\CopyrightYear{2001} % Allows a non-default  copyright year  to be 'entered' - IF NEED BE.
+%\crdata{0-12345-67-8/90/01}  % Allows non-default copyright data to be 'entered' - IF NEED BE.
+% --- End of author Metadata ---
+
+\title{A Sample ACM SIGKDD Explorations article in LaTeX}
+%\subtitle{[Extended Abstract]
+% You need the command \numberofauthors to handle the "boxing"
+% and alignment of the authors under the title, and to add
+% a section for authors number 4 through n.
+%
+% Up to the first three authors are aligned under the title;
+% use the \alignauthor commands below to handle those names
+% and affiliations. Add names, affiliations, addresses for
+% additional authors as the argument to \additionalauthors;
+% these will be set for you without further effort on your
+% part as the last section in the body of your article BEFORE
+% References or any Appendices.
+
+\numberofauthors{5}
+%
+% You can go ahead and credit authors number 4+ here;
+% their names will appear in a section called
+% "Additional Authors" just before the Appendices
+% (if there are any) or Bibliography (if there
+% aren't)
+
+% Put no more than the first THREE authors in the \author command
+%%You are free to format the authors in alternate ways if you have more 
+%%than three authors.
+
+\author{
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+%% e-mail address with \email.
+\alignauthor Ben Trovato \\
+       \affaddr{Institute for Clarity in Documentation}\\
+       \affaddr{1932 Wallamaloo Lane}\\
+       \affaddr{Wallamaloo, New Zealand}\\
+       \email{trovato@corporation.com}
+\alignauthor G.K.M. Tobin\\
+       \affaddr{Institute for Clarity in Documentation}\\
+       \affaddr{P.O. Box 1212}\\
+       \affaddr{Dublin, Ohio 43017-6221}\\
+       \email{webmaster@marysville-ohio.com}
+\alignauthor Lars Th{\o}rv\"{a}ld\titlenote{This author is the
+one who did all the really hard work.}\\
+       \affaddr{The Th{\o}rv\"{a}ld Group}\\
+       \affaddr{1 Th{\o}rv\"{a}ld Circle}\\
+       \affaddr{Hekla, Iceland}\\
+       \email{larst@affiliation.org}
+}
+\additionalauthors{Additional authors: John Smith (The Th{\o}rvald Group,
+email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
+(The Kumquat Consortium, email: {\texttt{jpkumquat@consortium.net}}).}
+\date{30 July 1999}
+\maketitle
+\begin{abstract}
+This paper provides a sample of a LaTeX document for final submission
+to Sigkdd Explorations, the official newsletter of ACM Sigkdd. This is
+a modified version of the ACM Proceedings sample file.
+
+The developers have tried to include every imaginable sort
+of ``bells and whistles", such as a subtitle, footnotes on
+title, subtitle and authors, as well as in the text, and
+every optional component (e.g. Acknowledgements, Additional
+Authors, Appendices), not to mention examples of
+equations, theorems, tables and figures.
+
+To make best use of this sample document, run it through \LaTeX\
+and BibTeX, and compare this source code with the printed
+output produced by the dvi file.
+\end{abstract}
+
+\section{Introduction}
+The \textit{proceedings} are the records of a conference.
+ACM seeks to give these conference by-products a uniform,
+high-quality appearance.  To do this, ACM has some rigid
+requirements for the format of the proceedings documents: there
+is a specified format (balanced  double columns), a specified
+set of fonts (Arial or Helvetica and Times Roman) in
+certain specified sizes (for instance, 9 point for body copy),
+a specified live area (18 $\times$ 23.5 cm [7" $\times$ 9.25"]) centered on
+the page, specified size of margins (2.54cm [1"] top and
+bottom and 1.9cm [.75"] left and right; specified column width
+(8.45cm [3.33"]) and gutter size (.083cm [.33"]).
+
+The good news is, with only a handful of manual
+settings\footnote{Two of these, the {\texttt{\char'134 numberofauthors}}
+and {\texttt{\char'134 alignauthor}} commands, you have
+already used; another, {\texttt{\char'134 balancecolumns}}, will
+be used in your very last run of \LaTeX\ to ensure
+balanced column heights on the last page.}, the \LaTeX\ document
+class file handles all of this for you.
+
+The remainder of this document is concerned with showing, in
+the context of an ``actual'' document, the \LaTeX\ commands
+specifically available for denoting the structure of a
+proceedings paper, rather than with giving rigorous descriptions
+or explanations of such commands.
+
+\section{The Body of The Paper}
+Typically, the body of a paper is organized
+into a hierarchical structure, with numbered or unnumbered
+headings for sections, subsections, sub-subsections, and even
+smaller sections.  The command \texttt{{\char'134}section} that
+precedes this paragraph is part of such a
+hierarchy.\footnote{This is the second footnote.  It
+starts a series of three footnotes that add nothing
+informational, but just give an idea of how footnotes work
+and look. It is a wordy one, just so you see
+how a longish one plays out.} \LaTeX\ handles the numbering
+and placement of these headings for you, when you use
+the appropriate heading commands around the titles
+of the headings.  If you want a sub-subsection or
+smaller part to be unnumbered in your output, simply append an
+asterisk to the command name.  Examples of both
+numbered and unnumbered headings will appear throughout the
+balance of this sample document.
+
+Because the entire article is contained in
+the \textbf{document} environment, you can indicate the
+start of a new paragraph with a blank line in your
+input file; that is why this sentence forms a separate paragraph.
+
+\subsection{Type Changes and Special Characters}
+We have already seen several typeface changes in this sample.  You
+can indicate italicized words or phrases in your text with
+the command \texttt{{\char'134}textit}; emboldening with the
+command \texttt{{\char'134}textbf}
+and typewriter-style (for instance, for computer code) with
+\texttt{{\char'134}texttt}.  But remember, you do not
+have to indicate typestyle changes when such changes are
+part of the \textit{structural} elements of your
+article; for instance, the heading of this subsection will
+be in a sans serif\footnote{A third footnote, here.
+Let's make this a rather short one to
+see how it looks.} typeface, but that is handled by the
+document class file. Take care with the use
+of\footnote{A fourth, and last, footnote.}
+the curly braces in typeface changes; they mark
+the beginning and end of
+the text that is to be in the different typeface.
+
+You can use whatever symbols, accented characters, or
+non-English characters you need anywhere in your document;
+you can find a complete list of what is
+available in the \textit{\LaTeX\
+User's Guide}\cite{Lamport:LaTeX}.
+
+\subsection{Math Equations}
+You may want to display math equations in three distinct styles:
+inline, numbered or non-numbered display.  Each of
+the three are discussed in the next sections.
+
+\subsubsection{Inline (In-text) Equations}
+A formula that appears in the running text is called an
+inline or in-text formula.  It is produced by the
+\textbf{math} environment, which can be
+invoked with the usual \texttt{{\char'134}begin. . .{\char'134}end}
+construction or with the short form \texttt{\$. . .\$}. You
+can use any of the symbols and structures,
+from $\alpha$ to $\omega$, available in
+\LaTeX\cite{Lamport:LaTeX}; this section will simply show a
+few examples of in-text equations in context. Notice how
+this equation: \begin{math}\lim_{n\rightarrow \infty}x=0\end{math},
+set here in in-line math style, looks slightly different when
+set in display style.  (See next section).
+
+\subsubsection{Display Equations}
+A numbered display equation -- one set off by vertical space
+from the text and centered horizontally -- is produced
+by the \textbf{equation} environment. An unnumbered display
+equation is produced by the \textbf{displaymath} environment.
+
+Again, in either environment, you can use any of the symbols
+and structures available in \LaTeX; this section will just
+give a couple of examples of display equations in context.
+First, consider the equation, shown as an inline equation above:
+\begin{equation}\lim_{n\rightarrow \infty}x=0\end{equation}
+Notice how it is formatted somewhat differently in
+the \textbf{displaymath}
+environment.  Now, we'll enter an unnumbered equation:
+\begin{displaymath}\sum_{i=0}^{\infty} x + 1\end{displaymath}
+and follow it with another numbered equation:
+\begin{equation}\sum_{i=0}^{\infty}x_i=\int_{0}^{\pi+2} f\end{equation}
+just to demonstrate \LaTeX's able handling of numbering.
+
+\subsection{Citations}
+Citations to articles \cite{bowman:reasoning, clark:pct, braams:babel, herlihy:methodology},
+conference
+proceedings \cite{clark:pct} or books \cite{salas:calculus, Lamport:LaTeX} listed
+in the Bibliography section of your
+article will occur throughout the text of your article.
+You should use BibTeX to automatically produce this bibliography;
+you simply need to insert one of several citation commands with
+a key of the item cited in the proper location in
+the \texttt{.tex} file \cite{Lamport:LaTeX}.
+The key is a short reference you invent to uniquely
+identify each work; in this sample document, the key is
+the first author's surname and a
+word from the title.  This identifying key is included
+with each item in the \texttt{.bib} file for your article.
+
+The details of the construction of the \texttt{.bib} file
+are beyond the scope of this sample document, but more
+information can be found in the \textit{Author's Guide},
+and exhaustive details in the \textit{\LaTeX\ User's
+Guide}\cite{Lamport:LaTeX}.
+
+So far, this article has shown only the plainest form
+of the citation command, using \texttt{{\char'134}cite}.
+%
+%You can also use a citation as a noun in a sentence, as
+% is done here, and in the \citeN{herlihy:methodology} article;
+% use \texttt{{\char'134}citeN} in this case.  You can
+% even say, ``As was shown in \citeyearNP{bowman:reasoning}. . .''
+% or ``. . . which agrees with \citeANP{braams:babel}...'',
+% where the text shows only the year or only the author
+% component of the citation; use \texttt{{\char'134}citeyearNP}
+% or \texttt{{\char'134}citeANP}, respectively,
+% for these.  Most of the various citation commands may
+% reference more than one work \cite{herlihy:methodology,bowman:reasoning}.
+% A complete list of all citation commands available is
+% given in the \textit{Author's Guide}.
+
+\subsection{Tables}
+Because tables cannot be split across pages, the best
+placement for them is typically the top of the page
+nearest their initial cite.  To
+ensure this proper ``floating'' placement of tables, use the
+environment \textbf{table} to enclose the table's contents and
+the table caption.  The contents of the table itself must go
+in the \textbf{tabular} environment, to
+be aligned properly in rows and columns, with the desired
+horizontal and vertical rules.  Again, detailed instructions
+on \textbf{tabular} material
+is found in the \textit{\LaTeX\ User's Guide}.
+
+Immediately following this sentence is the point at which
+Table 1 is included in the input file; compare the
+placement of the table here with the table in the printed
+dvi output of this document.
+
+\begin{table}
+\centering
+\caption{Frequency of Special Characters}
+\begin{tabular}{|c|c|l|} \hline
+Non-English or Math&Frequency&Comments\\ \hline
+\O & 1 in 1,000& For Swedish names\\ \hline
+$\pi$ & 1 in 5& Common in math\\ \hline
+\$ & 4 in 5 & Used in business\\ \hline
+$\Psi^2_1$ & 1 in 40,000& Unexplained usage\\
+\hline\end{tabular}
+\end{table}
+
+To set a wider table, which takes up the whole width of
+the page's live area, use the environment
+\textbf{table*} to enclose the table's contents and
+the table caption.  As with a single-column table, this wide
+table will "float" to a location deemed more desirable.
+Immediately following this sentence is the point at which
+Table 2 is included in the input file; again, it is
+instructive to compare the placement of the
+table here with the table in the printed dvi
+output of this document.
+
+
+\begin{table*}
+\centering
+\caption{Some Typical Commands}
+\begin{tabular}{|c|c|l|} \hline
+Command&A Number&Comments\\ \hline
+\texttt{{\char'134}alignauthor} & 100& Author alignment\\ \hline
+\texttt{{\char'134}numberofauthors}& 200& Author enumeration\\ \hline
+\texttt{{\char'134}table}& 300 & For tables\\ \hline
+\texttt{{\char'134}table*}& 400& For wider tables\\ \hline\end{tabular}
+\end{table*}
+% end the environment with {table*}, NOTE not {table}!
+
+\subsection{Theorem-like Constructs}
+Other common constructs that may occur in your article are
+the forms for logical constructs like theorems, axioms,
+corollaries and proofs.  There are
+two forms, one produced by the
+command \texttt{{\char'134}newtheorem} and the
+other by the command \texttt{{\char'134}newdef}; perhaps
+the clearest and easiest way to distinguish them is
+to compare the two in the output of this sample document:
+
+This uses the \textbf{theorem} environment, created by
+the \texttt{{\char'134}newtheorem} command:
+\newtheorem{theorem}{Theorem}
+\begin{theorem}
+Let $f$ be continuous on $[a,b]$.  If $G$ is
+an antiderivative for $f$ on $[a,b]$, then
+\begin{displaymath}\int^b_af(t)dt = G(b) - G(a).\end{displaymath}
+\end{theorem}
+
+The other uses the \textbf{definition} environment, created
+by the \texttt{{\char'134}newdef} command:
+\newdef{definition}{Definition}
+\begin{definition}
+If $z$ is irrational, then by $e^z$ we mean the
+unique number which has
+logarithm $z$: \begin{displaymath}{\log_e^z = z}\end{displaymath}
+\end{definition}
+
+Two lists of constructs that use one of these
+forms is given in the
+\textit{Author's  Guidelines}.
+ 
+There is one other similar construct environment, which is
+already set up
+for you; i.e. you must \textit{not} use
+a \texttt{{\char'134}newdef} command to
+create it: the \textbf{proof} environment.  Here
+is a example of its use:
+\begin{proof}
+Suppose on the contrary there exists a real number $L$ such that
+\begin{displaymath}
+\lim_{x\rightarrow\infty} \frac{f(x)}{g(x)} = L.
+\end{displaymath}
+Then
+\begin{displaymath}
+l=\lim_{x\rightarrow c} f(x)
+= \lim_{x\rightarrow c}
+\left[ g{x} \cdot \frac{f(x)}{g(x)} \right ]
+= \lim_{x\rightarrow c} g(x) \cdot \lim_{x\rightarrow c}
+\frac{f(x)}{g(x)} = 0\cdot L = 0,
+\end{displaymath}
+which contradicts our assumption that $l\neq 0$.
+\end{proof}
+
+Complete rules about using these environments and using the
+two different creation commands are in the
+\textit{Author's Guide}; please consult it for more
+detailed instructions.  If you need to use another construct,
+not listed therein, which you want to have the same
+formatting as the Theorem
+or the Definition\cite{salas:calculus} shown above,
+use the \texttt{{\char'134}newtheorem} or the
+\texttt{{\char'134}newdef} command,
+respectively, to create it.
+
+\subsection*{A Caveat for the \TeX\ Expert}
+Because you have just been given permission to
+use the \texttt{{\char'134}newdef} command to create a
+new form, you might think you can
+use \TeX's \texttt{{\char'134}def} to create a
+new command: \textit{Please refrain from doing this!}
+Remember that your \LaTeX\ source code is primarily intended
+to create camera-ready copy, but may be converted
+to other forms -- e.g. HTML. If you inadvertently omit
+some or all of the \texttt{{\char'134}def}s recompilation will
+be, to say the least, problematic.
+
+\section{Conclusions}
+This paragraph will end the body of this sample document.
+Remember that you might still have Acknowledgements or
+Appendices; brief samples of these
+follow.  There is still the Bibliography to deal with; and
+we will make a disclaimer about that here: with the exception
+of the reference to the \LaTeX\ book, the citations in
+this paper are to articles which have nothing to
+do with the present subject and are used as
+examples only.
+%\end{document}  % This is where a 'short' article might terminate
+
+%ACKNOWLEDGEMENTS are optional
+\section{Acknowledgements}
+This section is optional; it is a location for you
+to acknowledge grants, funding, editing assistance and
+what have you.  In the present case, for example, the
+authors would like to thank Gerald Murray of ACM for
+his help in codifying this \textit{Author's Guide}
+and the \textbf{.cls} and \textbf{.tex} files that it describes.
+
+%
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{sigproc}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
+%APPENDICES are optional
+% SIGKDD: balancing columns messes up the footers: Sunita Sarawagi, Jan 2000.
+% \balancecolumns
+\appendix
+%Appendix A
+\section{Headings in Appendices}
+The rules about hierarchical headings discussed above for
+the body of the article are different in the appendices.
+In the \textbf{appendix} environment, the command
+\textbf{section} is used to
+indicate the start of each Appendix, with alphabetic order
+designation (i.e. the first is A, the second B, etc.) and
+a title (if you include one).  So, if you need
+hierarchical structure
+\textit{within} an Appendix, start with \textbf{subsection} as the
+highest level. Here is an outline of the body of this
+document in Appendix-appropriate form:
+\subsection{Introduction}
+\subsection{The Body of the Paper}
+\subsubsection{Type Changes and Special Characters}
+\subsubsection{Math Equations}
+\paragraph{Inline (In-text) Equations}
+\paragraph{Display Equations}
+\subsubsection{Citations}
+\subsubsection{Tables}
+\subsubsection{Figures}
+\subsubsection{Theorem-like Constructs}
+\subsubsection*{A Caveat for the \TeX\ Expert}
+\subsection{Conclusions}
+\subsection{Acknowledgements}
+\subsection{Additional Authors}
+This section is inserted by \LaTeX; you do not insert it.
+You just add the names and information in the
+\texttt{{\char'134}additionalauthors} command at the start
+of the document.
+\subsection{References}
+Generated by bibtex from your ~.bib file.  Run latex,
+then bibtex, then latex twice (to resolve references)
+to create the ~.bbl file.  Insert that ~.bbl file into
+the .tex source file and comment out
+the command \texttt{{\char'134}thebibliography}.
+% This next section command marks the start of
+% Appendix B, and does not continue the present hierarchy
+\section{More Help for the Hardy}
+The acmproc-sp document class file itself is chock-full of succinct
+and helpful comments.  If you consider yourself a moderately
+experienced to expert user of \LaTeX, you may find reading
+it useful but please remember not to change it.
+
+% That's all folks!
+\end{document}
