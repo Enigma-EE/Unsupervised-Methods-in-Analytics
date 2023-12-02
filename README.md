@@ -2,7 +2,7 @@
  2023S2
 
 ### Applications of Unsupervised Methods
-**PDF** https://github.com/Enna2023/Unsupervised-Methods-in-Analytics/blob/main/Assignment2/Assignment2.pdf
+**PDF** https://github.com/Enna2023/Unsupervised-Methods-in-Analytics/blob/main/Assignment2/Assignment2.pdf\
 **KDD** https://github.com/Enna2023/Unsupervised-Methods-in-Analytics/blob/main/Assignment2/Assignment2_kdd.pdf
 
 ### Cluster Analysis
