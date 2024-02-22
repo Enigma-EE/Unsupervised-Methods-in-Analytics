@@ -13,4 +13,4 @@
 [https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week11/Association_ana.pdf](https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week11/Association_ana.pdf)
 
 ### Anomaly Detection
-[https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week9/Prac7.pdf](https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week9/Prac7.pdf)https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week9/Prac7.pdf
+[https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week9/Prac7.pdf](https://github.com/Enigma-EE/Unsupervised-Methods-in-Analytics/blob/main/prac/week9/Prac7.pdf)
